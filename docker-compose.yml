@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+
+  # backend Service with express framework
+  backend:
+    build:
+      context: "./backend"
+      # target: development
+      args:
+       NODE_VERSION: ${NODE_VERSION}
+    user: "${UID}:${GID}"
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+      # - "9229:9229"
+    networks:
+      - backend
+    environment:
+      NODE_ENV: development
+      # MODE: DEV
+      # SERVER_PORT: 3000
+    env_file:
+    - backend.env
+    command: "npm run start:dev"
+    # depends_on:
+    #   - postgres
+  
+  # frontend Service with express framework
+  frontend:
+    build:
+      context: "./frontend"
+      args:
+       NODE_VERSION: ${NODE_VERSION}
+    user: "${UID}:${GID}"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    working_dir: /usr/src/app
+    ports:
+      - "8080:8080"
+      - "5000:3000" #For json-server (development)
+    networks:
+      - backend
+    environment:
+      NODE_ENV: development
+      NAME: Julien
+    # command: "npm run serve"
+    command: "tail -f"
+    # depends_on:
+    #   - postgres
+  
+
+  # # PostgreSQL Service
+  # postgres:
+  #   image: postgres:${POSTGRES_VERSION}
+  #   networks:
+  #     - backend
+  #   restart: on-failure
+  #   environment:
+  #     POSTGRES_USER: ${DB_USERNAME}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #     POSTGRES_DB: ${DB_NAME}
+  #   volumes:
+  #     - ./postgres_data:/var/lib/postgresql/data
+  #   container_name: ${POSTGRES_NAME}
+
+  # Networks
+networks:
+  backend:
+
+#   # Volumes
+# volumes:
+#   postgredata:
